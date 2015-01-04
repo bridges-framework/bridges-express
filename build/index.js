@@ -1,40 +1,44 @@
 "use strict";
 
-var Supervisor = require("domain-supervisor").Supervisor;
-var Process = require("domain-supervisor").Process;
-var Promise = require("bluebird");
+var express = require("express");
+var BridgesController = require("bridges-controller");
+var BridgesRoutes = require("bridges-routes");
+var fs = require("fs");
+var path = require("path");
 
-var requireAll = require("require-all-to-camel");
+var BridgesExpress = function BridgesExpress(options) {
+  if (!fs.existsSync(options.directory)) {
+    throw new Error("options.directory must be a directory");
+  }
+  this.directory = options.directory;
+  var server = express();
 
-var BridgesSupervisor = function BridgesSupervisor(options) {
-  this._supervisor = new Supervisor();
-  this.processes = requireAll(options.directory);
-  this.inject = options.inject || [];
+  if (!options.controllers) {
+    options.controllers = { inject: [] };
+  }
 
-  this.onError = function (error, restart, crash) {
-    console.log("bridges:supervisor:error:message", error.message);
-    console.log("bridges:supervisor:error:stack", error.stack);
-    console.log("bridges:supervisor:restart");
-    restart();
-  };
-};
-
-BridgesSupervisor.prototype.start = function () {
-  var _this = this;
-  return new Promise(function (resolve, reject) {
-    var processes = [];
-    try {
-      Object.keys(_this.processes).forEach(function (name) {
-        var proc = new Process(function () {
-          _this.processes[name].call(this, _this.inject);
-        });
-        processes.push(_this._supervisor.run(proc, _this.onError));
-      });
-    } catch (error) {
-      return reject(error);
-    }
-    resolve(processes);
+  var controllers = BridgesController.load({
+    directory: path.join(options.directory, "/controllers"),
+    inject: options.controllers.inject
   });
+
+  server.use("/", BridgesRoutes.draw({
+    controllers: controllers,
+    path: path.join(options.directory, "config/routes")
+  }));
+
+  server.use(function (error, req, res, next) {
+    if (error) {
+      res.status(500).send({
+        success: false,
+        error: error.message
+      });
+    } else {
+      next();
+    }
+  });
+
+  return server;
 };
 
-module.exports = BridgesSupervisor;
+module.exports = BridgesExpress;

@@ -1,5 +1,5 @@
 {
-  "name": "bridges-supervisor",
+  "name": "bridges-express",
   "version": "0.1.0",
   "description": "",
   "main": "build/",
@@ -11,12 +11,14 @@
   "license": "ISC",
   "repository": {
     "type": "git",
-    "url": "https://github.com/stevenzeiler/bridges-supervisor"
+    "url": "https://github.com/stevenzeiler/bridges-express"
   },
   "dependencies": {
-    "bluebird": "^2.5.3",
-    "domain-supervisor": "^0.3.1",
-    "require-all-to-camel": "^1.0.0"
+    "body-parser": "^1.10.1",
+    "bridges-controller": "^0.1.0",
+    "bridges-routes": "^1.0.0",
+    "express": "^4.10.6",
+    "helmet": "^0.5.4"
   },
   "devDependencies": {
     "gulp": "^3.8.10",
