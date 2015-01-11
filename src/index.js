@@ -3,6 +3,7 @@ var BridgesController = require('bridges-controller');
 var BridgesRoutes     = require('bridges-routes');
 var fs                = require('fs');
 var path              = require('path');
+var bodyParser        = require('body-parser');
 
 class BridgesExpress {
 
@@ -21,6 +22,9 @@ class BridgesExpress {
       directory : path.join(options.directory, '/controllers'),
       inject : options.controllers.inject
     })
+
+    server.use(bodyParser.json());
+    server.use(bodyParser.urlencoded({ extended: true }));
 
     server.use('/', BridgesRoutes.draw({
       controllers : controllers,
