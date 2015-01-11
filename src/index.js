@@ -23,8 +23,8 @@ class BridgesExpress {
       inject : options.controllers.inject
     })
 
-    server.use(bodyParser.json());
-    server.use(bodyParser.urlencoded({ extended: true }));
+    server.use(bodyParser.json())
+    server.use(bodyParser.urlencoded({ extended: true }))
 
     server.use('/', BridgesRoutes.draw({
       controllers : controllers,
