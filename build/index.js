@@ -8,11 +8,17 @@ var path = require("path");
 var bodyParser = require("body-parser");
 
 var BridgesExpress = function BridgesExpress(options) {
+  var app;
+  if (options.app) {
+    app = options.app;
+  } else {
+    app = express();
+  }
+
   if (!fs.existsSync(options.directory)) {
     throw new Error("options.directory must be a directory");
   }
   this.directory = options.directory;
-  var server = express();
 
   if (!options.controllers) {
     options.controllers = { inject: [] };
@@ -23,15 +29,15 @@ var BridgesExpress = function BridgesExpress(options) {
     inject: options.controllers.inject
   });
 
-  server.use(bodyParser.json());
-  server.use(bodyParser.urlencoded({ extended: true }));
+  app.use(bodyParser.json());
+  app.use(bodyParser.urlencoded({ extended: true }));
 
-  server.use("/", BridgesRoutes.draw({
+  app.use("/", BridgesRoutes.draw({
     controllers: controllers,
     path: path.join(options.directory, "config/routes")
   }));
 
-  server.use(function (error, req, res, next) {
+  app.use(function (error, req, res, next) {
     if (error) {
       res.status(500).send({
         success: false,
@@ -42,7 +48,7 @@ var BridgesExpress = function BridgesExpress(options) {
     }
   });
 
-  return server;
+  return app;
 };
 
 module.exports = BridgesExpress;
